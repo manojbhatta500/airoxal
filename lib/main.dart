@@ -1,3 +1,4 @@
+import 'package:airoxal/features/auth/blocs/loginbloc/login_bloc.dart';
 import 'package:airoxal/features/auth/blocs/signinbloc/signin_bloc.dart';
 import 'package:airoxal/features/auth/pages/choose_option.dart';
 import 'package:flutter/material.dart';
@@ -12,8 +13,15 @@ class Root extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => SigninBloc(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => SigninBloc(),
+        ),
+        BlocProvider(
+          create: (context) => LoginBloc(),
+        ),
+      ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
         home: ChooseOption(),
