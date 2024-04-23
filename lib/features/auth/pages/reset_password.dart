@@ -1,17 +1,31 @@
+import 'dart:developer';
+
+import 'package:airoxal/features/auth/blocs/resetpassword/reset_password_bloc.dart';
 import 'package:airoxal/features/auth/pages/password_changed.dart';
 import 'package:airoxal/utils/constants.dart';
 import 'package:airoxal/features/auth/widgets/yello_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class ResetPassword extends StatefulWidget {
-  const ResetPassword({super.key});
+  ResetPassword({super.key, required this.getEmail});
+
+  final String getEmail;
 
   @override
   State<ResetPassword> createState() => _ResetPasswordState();
 }
 
 class _ResetPasswordState extends State<ResetPassword> {
+  var showPassword1 = false;
+
+  var showPassword2 = false;
+
+  final TextEditingController password1 = TextEditingController();
+
+  final TextEditingController password2 = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -90,6 +104,8 @@ class _ResetPasswordState extends State<ResetPassword> {
                   ),
                 ),
                 child: TextField(
+                  controller: password1,
+                  obscureText: showPassword1,
                   decoration: InputDecoration(
                       hintText: 'must be 8 characters',
                       hintStyle: TextStyle(
@@ -99,7 +115,21 @@ class _ResetPasswordState extends State<ResetPassword> {
                         fontWeight: FontWeight.w400,
                         height: 0.08,
                       ),
-                      suffixIcon: const Icon(Icons.remove_red_eye),
+                      suffixIcon: IconButton(
+                          onPressed: () {
+                            if (showPassword1) {
+                              setState(() {
+                                showPassword1 = false;
+                              });
+                            } else {
+                              setState(() {
+                                showPassword1 = true;
+                              });
+                            }
+                          },
+                          icon: showPassword1
+                              ? Icon(Icons.visibility_off)
+                              : Icon(Icons.visibility)),
                       border: InputBorder.none),
                 ),
               ),
@@ -126,6 +156,8 @@ class _ResetPasswordState extends State<ResetPassword> {
                   ),
                 ),
                 child: TextField(
+                  controller: password2,
+                  obscureText: showPassword2,
                   decoration: InputDecoration(
                       hintText: 'repeat password',
                       hintStyle: TextStyle(
@@ -135,21 +167,58 @@ class _ResetPasswordState extends State<ResetPassword> {
                         fontWeight: FontWeight.w400,
                         height: 0.08,
                       ),
-                      suffixIcon: const Icon(Icons.remove_red_eye),
+                      suffixIcon: IconButton(
+                          onPressed: () {
+                            if (showPassword2) {
+                              setState(() {
+                                showPassword2 = false;
+                              });
+                            } else {
+                              setState(() {
+                                showPassword2 = true;
+                              });
+                            }
+                          },
+                          icon: showPassword2
+                              ? Icon(Icons.visibility_off)
+                              : Icon(Icons.visibility)),
                       border: InputBorder.none),
                 ),
               ),
               const SizedBox(
                 height: 40,
               ),
-              GestureDetector(
-                  onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) {
-                      return const PasswrodChanged();
-                    }));
-                  },
-                  child: const YelloButton(title: 'Reset password')),
+              BlocListener<ResetPasswordBloc, ResetPasswordState>(
+                listener: (context, state) {
+                  switch (state.runtimeType) {
+                    case ResetPasswordSuccess:
+                      log('this is reset password success state');
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return const PasswrodChanged();
+                      }));
+                    case ResetPasswordFailed:
+                      log('this is reset password failed state');
+                    default:
+                      log('this is reset password default state');
+                  }
+                },
+                child: GestureDetector(
+                    onTap: () {
+                      if (password1.text == password2.text) {
+                        BlocProvider.of<ResetPasswordBloc>(context).add(
+                            OnRestButtonPressed(
+                                email: widget.getEmail,
+                                password: password1.text,
+                                confirm_password: password2.text));
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            backgroundColor: Colors.red,
+                            content: Text('password should match')));
+                      }
+                    },
+                    child: const YelloButton(title: 'Reset password')),
+              ),
             ],
           ),
         ),

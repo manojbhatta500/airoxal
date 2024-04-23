@@ -1,4 +1,7 @@
+import 'package:airoxal/features/auth/blocs/Otp_auth/otp_auth_bloc.dart';
+import 'package:airoxal/features/auth/blocs/forgotpassword/forgot_password_bloc.dart';
 import 'package:airoxal/features/auth/blocs/loginbloc/login_bloc.dart';
+import 'package:airoxal/features/auth/blocs/resetpassword/reset_password_bloc.dart';
 import 'package:airoxal/features/auth/blocs/signinbloc/signin_bloc.dart';
 import 'package:airoxal/features/auth/pages/choose_option.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +23,15 @@ class Root extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => LoginBloc(),
+        ),
+        BlocProvider(
+          create: (context) => ForgotPasswordBloc(),
+        ),
+        BlocProvider(
+          create: (context) => OtpAuthBloc(),
+        ),
+        BlocProvider(
+          create: (context) => ResetPasswordBloc(),
         ),
       ],
       child: const MaterialApp(

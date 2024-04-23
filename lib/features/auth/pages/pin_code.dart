@@ -1,18 +1,18 @@
+import 'dart:developer';
+
+import 'package:airoxal/features/auth/blocs/Otp_auth/otp_auth_bloc.dart';
 import 'package:airoxal/features/auth/pages/reset_password.dart';
 import 'package:airoxal/features/auth/widgets/yello_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:flutter_pin_code_fields/flutter_pin_code_fields.dart';
 
-class PinCode extends StatefulWidget {
-  const PinCode({super.key});
+class PinCode extends StatelessWidget {
+  PinCode({super.key, required this.getEmail});
+  final String getEmail;
 
-  @override
-  State<PinCode> createState() => _PinCodeState();
-}
-
-class _PinCodeState extends State<PinCode> {
   final TextEditingController _pinCodeController = TextEditingController();
 
   @override
@@ -71,8 +71,8 @@ class _PinCodeState extends State<PinCode> {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
-                    const TextSpan(
-                      text: 'helloworld@gmail.com',
+                    TextSpan(
+                      text: '${getEmail}',
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 16,
@@ -87,7 +87,7 @@ class _PinCodeState extends State<PinCode> {
                 height: 40,
               ),
               PinCodeFields(
-                length: 4,
+                length: 6,
                 fieldBorderStyle: FieldBorderStyle.square,
                 fieldHeight: 70.0,
                 fieldWidth: 50.0,
@@ -98,16 +98,37 @@ class _PinCodeState extends State<PinCode> {
               SizedBox(
                 height: 0.1 * height,
               ),
-              GestureDetector(
-                  onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) {
-                      return const ResetPassword();
-                    }));
+              BlocListener<OtpAuthBloc, OtpAuthState>(
+                listener: (context, state) {
+                  switch (state.runtimeType) {
+                    case OtpAuthLoading:
+                      log('this is logging state of verify otp page');
+                    case OtpAuthSuccess:
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          backgroundColor: Colors.green,
+                          content: Text('verified successfully')));
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return ResetPassword(
+                          getEmail: getEmail,
+                        );
+                      }));
+                    case OtpAuthFailed:
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          backgroundColor: Colors.red,
+                          content: Text("Otp Didn't matched.")));
 
-                    //  successfull then go to another screen
-                  },
-                  child: const YelloButton(title: 'Verify')),
+                    default:
+                      log('this is default log states');
+                  }
+                },
+                child: GestureDetector(
+                    onTap: () {
+                      BlocProvider.of<OtpAuthBloc>(context).add(OnOtpCheckEvent(
+                          otp: _pinCodeController.text, email: getEmail));
+                    },
+                    child: const YelloButton(title: 'Verify')),
+              ),
               const SizedBox(
                 height: 40,
               ),

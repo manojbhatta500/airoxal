@@ -1,17 +1,18 @@
+import 'dart:developer';
+
+import 'package:airoxal/features/auth/blocs/forgotpassword/forgot_password_bloc.dart';
 import 'package:airoxal/features/auth/pages/login_screen.dart';
 import 'package:airoxal/features/auth/pages/pin_code.dart';
 import 'package:airoxal/features/auth/widgets/yello_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class ForgotPassword extends StatefulWidget {
-  const ForgotPassword({super.key});
+class ForgotPassword extends StatelessWidget {
+  ForgotPassword({super.key});
 
-  @override
-  State<ForgotPassword> createState() => _ForgotPasswordState();
-}
+  TextEditingController email = TextEditingController();
 
-class _ForgotPasswordState extends State<ForgotPassword> {
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -96,6 +97,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 ),
               ),
               child: TextField(
+                controller: email,
                 decoration: InputDecoration(
                     hintText: 'Enter your email address',
                     hintStyle: TextStyle(
@@ -111,13 +113,38 @@ class _ForgotPasswordState extends State<ForgotPassword> {
             SizedBox(
               height: 0.05 * height,
             ),
-            GestureDetector(
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return const PinCode();
-                  }));
-                },
-                child: const YelloButton(title: 'Send code')),
+            BlocListener<ForgotPasswordBloc, ForgotPasswordState>(
+              listener: (context, state) {
+                switch (state.runtimeType) {
+                  case ForgotPasswordLoadingState:
+                    log('this is forgot password loading state');
+                  case ForgotPasswordErrorState:
+                    log('this is forgot password error state');
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        backgroundColor: Colors.red,
+                        content: Text('Email does not exists')));
+                  case ForgotPasswordSuccessState:
+                    final data = state as ForgotPasswordSuccessState;
+
+                    log('this is forgot password success state');
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        backgroundColor: Colors.green,
+                        content: Text(data.data.message!)));
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                      return PinCode(
+                        getEmail: email.text,
+                      );
+                    }));
+                }
+              },
+              child: GestureDetector(
+                  onTap: () {
+                    BlocProvider.of<ForgotPasswordBloc>(context).add(
+                        OnForgotPasswordButtonPressed(userName: email.text));
+                  },
+                  child: const YelloButton(title: 'Send code')),
+            ),
           ],
         ),
       ),
