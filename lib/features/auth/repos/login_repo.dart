@@ -22,20 +22,25 @@ class LoginRepository {
           requestType: RequestType.postWithoutToken,
           url: GlobalApis.loginApi,
           parameter: dataMap);
-
+      log('this is login repository status ${response.statusCode}');
       if (response.statusCode == 200 || response.statusCode == 201) {
-        log('login Repository if  method  success');
+        log('login Repository if method success');
         log(response.body);
-        var actualdata = jsonDecode(response.body);
-        var successModel = LoginSuccessModel.fromJson(actualdata);
-        return Right(successModel);
+        var actualData = jsonDecode(response.body);
+        if (actualData['success'] == 'True') {
+          var successModel = LoginSuccessModel.fromJson(actualData);
+          return Right(successModel);
+        } else {
+          var failedModel = LoginFailedModel.fromJson(actualData);
+          return Left(failedModel);
+        }
       } else {
         log(response.statusCode.toString());
         log('Login Repository class else method not 200');
-        log('this is actual failed ressponse : ${response.body}');
-        var actualfaileddata = jsonDecode(response.body);
-        var failedmodel = LoginFailedModel.fromJson(actualfaileddata);
-        return Left(failedmodel);
+        log('this is actual failed response : ${response.body}');
+        var actualFailedData = jsonDecode(response.body);
+        var failedModel = LoginFailedModel.fromJson(actualFailedData);
+        return Left(failedModel);
       }
     } catch (e) {
       log('Login Repository class else method not 200');

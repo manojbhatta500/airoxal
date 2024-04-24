@@ -27,6 +27,13 @@ class _ResetPasswordState extends State<ResetPassword> {
   final TextEditingController password2 = TextEditingController();
 
   @override
+  void dispose() {
+    password1.dispose();
+    password2.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     return SafeArea(

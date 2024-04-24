@@ -9,11 +9,22 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:flutter_pin_code_fields/flutter_pin_code_fields.dart';
 
-class PinCode extends StatelessWidget {
+class PinCode extends StatefulWidget {
   PinCode({super.key, required this.getEmail});
   final String getEmail;
 
+  @override
+  State<PinCode> createState() => _PinCodeState();
+}
+
+class _PinCodeState extends State<PinCode> {
   final TextEditingController _pinCodeController = TextEditingController();
+
+  @override
+  void dispose() {
+    _pinCodeController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +83,7 @@ class PinCode extends StatelessWidget {
                       ),
                     ),
                     TextSpan(
-                      text: '${getEmail}',
+                      text: '${widget.getEmail}',
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 16,
@@ -110,7 +121,7 @@ class PinCode extends StatelessWidget {
                       Navigator.push(context,
                           MaterialPageRoute(builder: (context) {
                         return ResetPassword(
-                          getEmail: getEmail,
+                          getEmail: widget.getEmail,
                         );
                       }));
                     case OtpAuthFailed:
@@ -125,7 +136,8 @@ class PinCode extends StatelessWidget {
                 child: GestureDetector(
                     onTap: () {
                       BlocProvider.of<OtpAuthBloc>(context).add(OnOtpCheckEvent(
-                          otp: _pinCodeController.text, email: getEmail));
+                          otp: _pinCodeController.text,
+                          email: widget.getEmail));
                     },
                     child: const YelloButton(title: 'Verify')),
               ),
